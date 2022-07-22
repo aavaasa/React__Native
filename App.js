@@ -43,7 +43,15 @@ const options = {
 };
 
 axios.request(options).then(function (response) {
-	console.log(response.data);
+  var data = JSON.parse(response.data.split('(')[1].split(')')[0])
+	console.log(data);
+  const d = new Date(data["sys"]["sunrise"]*1000);
+  let h = addZero(d.getHours());
+  let m = addZero(d.getMinutes());
+  let time = h + ":" + m;
+  let temp = Math.round((data["main"]["feels_like"] - 32) * 5/9)
+  document.write(time + "<br />");
+  document.write("Temperature now is: " + temp)
 }).catch(function (error) {
 	console.error(error);
 });
@@ -53,8 +61,3 @@ function addZero(i) {
   return i;
 }
 
-const d = new Date(1658420802*1000);
-let h = addZero(d.getHours());
-let m = addZero(d.getMinutes());
-let time = h + ":" + m;
-document.write(time);
