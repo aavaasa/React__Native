@@ -1,6 +1,7 @@
 import React, {useState, useCallback,useEffect} from 'react';
 import axios from 'axios';
 import * as Location from 'expo-location';
+import Hour_weather from './hour_weather';
 
 import { 
   StyleSheet, 
@@ -61,14 +62,15 @@ const styles = StyleSheet.create({
 });
 
 export default function App() {
-
-  
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState();
+  const [cur_img, setCurImg] = useState("");
 
   useEffect(() => {
     (async () => {
+      setLoading(true)
+      setCurImg('')
       let {status} = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         axios({
@@ -77,7 +79,8 @@ export default function App() {
         })
         .then(res => {
             console.log(res.data);
-            setData(res.data)
+            setData(res.data);
+            setCurImg(background_image(res.data.weather[0]["description"]));
         })
         .catch(err => {
             console.dir(err);
@@ -91,15 +94,15 @@ export default function App() {
         })
         .then(res => {
             console.log(res.data);
-            setData(res.data)
+            setData(res.data);
+            setCurImg(background_image(res.data.weather[0]["description"]));
         })
         .catch(err => {
             console.dir(err);
         })
       }
 
-      
-
+      setLoading(false)
     })()
     
   }, [])
@@ -111,6 +114,7 @@ export default function App() {
   const fetchDataHandler = useCallback(() => {
     setLoading(true);
     setInput('');
+    setCurImg('')
     axios({
       method: 'GET',
       url: `https://api.openweathermap.org/data/2.5/weather?q=${input}&units=metric&appid=${api.key}`,
@@ -118,6 +122,7 @@ export default function App() {
     .then(res => {
         console.log(res.data);
         setData(res.data);
+        setCurImg(background_image(data?.weather[0]["description"]));
     })
     .catch(err => {
         console.dir(err);
@@ -129,20 +134,33 @@ export default function App() {
 
   function background_image(clouds) {
     if (clouds == "few clouds") {
-      return "sky.jpg"
+      return "https://media.istockphoto.com/photos/clear-blue-sky-background-picture-id508544168?b=1&k=20&m=508544168&s=170667a&w=0&h=WOYrVNi63gep7VdTc3mc9mbYCWoJ9_hraSqnAf5-9TU="
     }
     else if (clouds == "clear sky") {
-      return "clear.jpg"
+      return "https://www.minten-walter.de/files/public/images/AdobeStock_121270629.jpg"
+      // return "https://cdnb.artstation.com/p/marketplace/presentation_assets/000/385/415/large/file.jpg?1590347735"
+    }
+    else if (clouds == "overcast clouds") {
+      return "https://cdnb.artstation.com/p/marketplace/presentation_assets/000/385/415/large/file.jpg?1590347735"
+      // return "https://www.minten-walter.de/files/public/images/AdobeStock_121270629.jpg"
     }
   }
+  function addZero(i) {
+    if (i < 10) {i = "0" + i}
+    return i;
+  }
+  console.log(cur_img);
   //Hello World
-  const cur_img = background_image(data?.weather[0]["description"]);
+  // const cur_img = background_image(data?.weather[0]["description"]);
+  const d = new Date(data?.dt * 1000);
+  let h = addZero(d.getHours());
+  let m = addZero(d.getMinutes());
+  let time = h + ":" + m;
   // const cur_img = 'sky.jpg'
   return (
     <View style={styles.root}>
       <ImageBackground  
-        source={cur_img && require('./assets/' + cur_img)}
-        resizeMethod="cover"
+        source={cur_img && {uri: cur_img}}
         style={styles.image}>
           <View>
             <TextInput 
@@ -159,13 +177,13 @@ export default function App() {
               <ActivityIndicator size={'large'} color={'#fff'} />
             </View>
           )}
-
+          <Hour_weather />
           {data && (
             <View style={styles.infoView}>
               <Text style={styles.cityCountryText}>
-                {`${data?.name}, ${data?.sys?.country}`}
+                {`${data?.name}`}
               </Text>
-              <Text style={styles.dateText}>{new Date(data?.dt * 1000).toLocaleString()}</Text>
+              <Text style={styles.dateText}>Last updated at: {time}</Text>
               <Text style={styles.tempText}>{`${Math.round(
                 data?.main?.temp,
               )} °C`}</Text>
