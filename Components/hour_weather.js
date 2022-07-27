@@ -1,6 +1,5 @@
-import React, {useState, useCallback, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import axios from 'axios';
-import * as Location from 'expo-location';
 import { StyleSheet, Text, FlatList, View } from 'react-native';
 
 const styles = StyleSheet.create({
@@ -23,7 +22,7 @@ export default function Hour_weather({lon, lat}) {
             url: 'https://weatherbit-v1-mashape.p.rapidapi.com/forecast/hourly',
             params: {lat: lat, lon: lon, hours: '24'},
             headers: {
-                'X-RapidAPI-Key': 'bc75dc7ba4mshf35a7e6feb0f063p19d85djsn5091bc0dce13',
+                'X-RapidAPI-Key': '76a2f36ccbmshc0de947df3fb7cbp1a95cfjsn195edb2f51e4',
                 'X-RapidAPI-Host': 'weatherbit-v1-mashape.p.rapidapi.com'
             }
           })
@@ -48,32 +47,29 @@ export default function Hour_weather({lon, lat}) {
         setMinTemp(cur_temp)
       }
     }
-    const Item = ({ title }) => (
+    function addZero(i) {
+      if (i < 10) {i = "0" + i}
+      return i;
+    }
+    function getTime(epoch) {
+      const d = new Date(epoch * 1000)
+      let h = addZero(d.getHours());
+      let m = addZero(d.getMinutes());
+      return h + ":" + m;
+    }
+    const Item = ({ time, temp }) => (
       <View style={styles.item}>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.title}>{getTime(time)} {Math.round(temp)}</Text>
       </View>
     );
+    
     const renderItem = ({ item }) => (
-      <Item title={item.title} />
+      <Item time={item.ts} temp={item.temp}/>
     );
-    const DATA = [
-      {
-        id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-        title: 'First Item',
-      },
-      {
-        id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-        title: 'Second Item',
-      },
-      {
-        id: '58694a0f-3da1-471f-bd96-145571e29d72',
-        title: 'Third Item',
-      },
-    ];
     return (
       <View>
         <Text style={styles.minMaxText}>{`Min ${min_temp} °C / Max ${max_temp} °C`}</Text>
-        <FlatList data={DATA} renderItem={renderItem} keyExtractor={item => item.id} />
+        <FlatList data={data} renderItem={renderItem} keyExtractor={item => item.ts}/>
       </View>
     )
 }
