@@ -114,7 +114,6 @@ export default function App() {
   const fetchDataHandler = useCallback(() => {
     setLoading(true);
     setInput('');
-    setCurImg('')
     axios({
       method: 'GET',
       url: `https://api.openweathermap.org/data/2.5/weather?q=${input}&units=metric&appid=${api.key}`,
@@ -122,7 +121,7 @@ export default function App() {
     .then(res => {
         console.log(res.data);
         setData(res.data);
-        setCurImg(background_image(data?.weather[0]["description"]));
+        setCurImg(background_image(res.data.weather[0]["description"]));
     })
     .catch(err => {
         console.dir(err);
@@ -130,7 +129,7 @@ export default function App() {
     .finally(() => {
         setLoading(false);
     });
-  }, [input, api.key]);
+  }, [input, api.key, data]);
 
   function background_image(clouds) {
     if (clouds == "few clouds") {
@@ -144,12 +143,20 @@ export default function App() {
       return "https://cdnb.artstation.com/p/marketplace/presentation_assets/000/385/415/large/file.jpg?1590347735"
       // return "https://www.minten-walter.de/files/public/images/AdobeStock_121270629.jpg"
     }
+    else if (clouds == "broken clouds") {
+      return "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/625a747a-061b-477d-958f-a0d6cea9e4cb/dax9bd4-dd0da73d-5b6e-415c-b05e-19471f366e5a.jpg/v1/fill/w_1024,h_768,q_75,strp/broken_clouds_by_kevintheman_dax9bd4-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9NzY4IiwicGF0aCI6IlwvZlwvNjI1YTc0N2EtMDYxYi00NzdkLTk1OGYtYTBkNmNlYTllNGNiXC9kYXg5YmQ0LWRkMGRhNzNkLTViNmUtNDE1Yy1iMDVlLTE5NDcxZjM2NmU1YS5qcGciLCJ3aWR0aCI6Ijw9MTAyNCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.2HBtScMyydNDUe606gk2Jd8RHs6iM-76feSI7Dc3sLw"
+    }
+    else if (clouds == "scattered clouds") {
+      return "https://img.freepik.com/premium-photo/blue-sky-background-with-fluffy-cumulus-clouds-illuminated-by-setting-sun-panorama-white-fluffy-clouds-blue-sky-beautiful-vast-blue-sky-with-amazing-scattered-cumulus-clouds_295890-3396.jpg?w=360"
+    }
+    else {
+      return "https://www.minten-walter.de/files/public/images/AdobeStock_121270629.jpg"
+    }
   }
   function addZero(i) {
     if (i < 10) {i = "0" + i}
     return i;
   }
-  console.log(cur_img);
   //Hello World
   // const cur_img = background_image(data?.weather[0]["description"]);
   const d = new Date(data?.dt * 1000);
@@ -177,7 +184,6 @@ export default function App() {
               <ActivityIndicator size={'large'} color={'#fff'} />
             </View>
           )}
-          <Hour_weather />
           {data && (
             <View style={styles.infoView}>
               <Text style={styles.cityCountryText}>
@@ -187,9 +193,7 @@ export default function App() {
               <Text style={styles.tempText}>{`${Math.round(
                 data?.main?.temp,
               )} °C`}</Text>
-              <Text style={styles.minMaxText}>{`Min ${Math.round(
-                data?.main?.temp_min,
-              )} °C / Max ${Math.round(data?.main?.temp_max)} °C`}</Text>
+               <Hour_weather lon={data.coord.lon} lat={data.coord.lat}/>
             </View>
           )}
       </ImageBackground>
