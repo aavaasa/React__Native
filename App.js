@@ -38,23 +38,23 @@ const styles = StyleSheet.create({
   },
 
   cityCountryText: {
-    color: 'black',
+    color: 'white',
     fontSize: 35,
     fontWeight: 'bold',
   },
   dateText: {
-    color: 'black',
+    color: 'white',
     fontSize: 20,
     marginVertical: 10,
   },
   tempText: {
     fontSize: 40,
-    color: 'black',
+    color: 'white',
     marginVertical: 10,
    },
   minMaxText: {
     fontSize: 20,
-    color: 'black',
+    color: 'white',
     marginVertical: 10,
     fontWeight: '500',
   },
@@ -113,7 +113,7 @@ export default function App() {
     setInput('');
     axios({
       method: 'GET',
-      url: `https://api.openweathermap.org/data/2.5/forecast?q=${input}&units=metric&appid=${api.key}`,
+      url: `https://api.openweathermap.org/data/2.5/weather?q=${input}&units=metric&appid=${api.key}`,
     })
     .then(res => {
         console.log(res.data);
@@ -131,9 +131,13 @@ export default function App() {
     if (clouds == "few clouds") {
       return "sky.jpg"
     }
+    else if (clouds == "clear sky") {
+      return "clear.jpg"
+    }
   }
   //Hello World
   const cur_img = background_image(data?.weather[0]["description"]);
+  // const cur_img = 'sky.jpg'
   return (
     <View style={styles.root}>
       <ImageBackground  
