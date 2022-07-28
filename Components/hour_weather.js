@@ -1,36 +1,29 @@
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
-import { StyleSheet, Text, FlatList, View } from 'react-native';
-
-const styles = StyleSheet.create({
-  minMaxText: {
-    fontSize: 20,
-    color: 'white',
-    marginVertical: 10,
-    fontWeight: '500',
-  },
-});
+import { StyleSheet, Text, FlatList, View, Image } from 'react-native';
 
 export default function Hour_weather({lon, lat}) {
     const [data, setData] = useState();
     const [min_temp, setMinTemp] = useState(0);
     const [max_temp, setMaxTemp] = useState(0);
+    const hours = 24
     useEffect(() => {
       (async () => {
           axios({
             method: 'GET',
             url: 'https://weatherbit-v1-mashape.p.rapidapi.com/forecast/hourly',
-            params: {lat: lat, lon: lon, hours: '24'},
+            params: {lat: lat, lon: lon, hours: hours},
             headers: {
-                'X-RapidAPI-Key': '76a2f36ccbmshc0de947df3fb7cbp1a95cfjsn195edb2f51e4',
+                'X-RapidAPI-Key': 'ee16de5810msha97ceb3dfd05d48p1fffabjsn722c4e3f236f',
                 'X-RapidAPI-Host': 'weatherbit-v1-mashape.p.rapidapi.com'
             }
           })
           .then(res => {
-              console.log(res.data.data);
-              setData(res.data.data)
-              setMinTemp(res.data.data[0].temp)
-              setMaxTemp(res.data.data[0].temp)
+              const dat = res.data.data
+              console.log(dat);
+              setData(dat)
+              setMinTemp(dat[0].temp)
+              setMaxTemp(dat[0].temp)
           })
           .catch(err => {
               console.dir(err);
@@ -57,19 +50,57 @@ export default function Hour_weather({lon, lat}) {
       let m = addZero(d.getMinutes());
       return h + ":" + m;
     }
-    const Item = ({ time, temp }) => (
+    const Item = ({ time, temp, icon }) => (
       <View style={styles.item}>
-        <Text style={styles.title}>{getTime(time)} {Math.round(temp)}</Text>
+        <Text style={styles.title}>{getTime(time)}</Text>
+        <Image style={styles.iconWeather} source={{uri: "https://www.weatherbit.io/static/img/icons/"+icon+".png"}}></Image> 
+        <Text style={styles.title}>{Math.round(temp)}°</Text>
       </View>
     );
+    // if (data)
+    //   // console.log(data[0].weather.icon);
+    //   console.log("https://www.weatherbit.io/static/img/icons/"+data[0].weather.icon+".png");
     
     const renderItem = ({ item }) => (
-      <Item time={item.ts} temp={item.temp}/>
+      <Item style={styles.item} time={item.ts} temp={item.temp} icon={item.weather.icon}/>
     );
     return (
-      <View>
+      <View style={styles.hourlyWeather}>
         <Text style={styles.minMaxText}>{`Min ${min_temp} °C / Max ${max_temp} °C`}</Text>
-        <FlatList data={data} renderItem={renderItem} keyExtractor={item => item.ts}/>
+        <FlatList
+        style={styles.flatlist}
+        numColumns={hours}
+        data={data} 
+        renderItem={renderItem} 
+        keyExtractor={item => item.ts}/>
       </View>
     )
 }
+
+const styles = StyleSheet.create({
+  minMaxText: {
+    fontSize: 20,
+    color: 'white',
+    marginVertical: 10,
+    fontWeight: '500',
+  },
+  item: {
+    marginRight: 10,
+    alignItems: 'center',
+    paddingBottom: 10,
+  },
+  flatlist: {
+    maxWidth: 240,
+    overflowX: 'auto',
+  },
+  iconWeather: {
+    height: 32,
+    width: 32
+  },
+  title: {
+    color: 'white'
+  },
+  hourlyWeather: {
+    alignItems: 'center'
+  }
+});

@@ -111,10 +111,9 @@ export default function App() {
     return time
   }
   return (
-    <View style={styles.root}>
+    <View>
       <ImageBackground  
-        source={cur_img && {uri: cur_img}}
-        style={styles.image}>
+        source={cur_img && {uri: cur_img}}>
           <View>
             <TextInput 
               placeholder = "Enter the city name"
@@ -139,7 +138,9 @@ export default function App() {
               <Text style={styles.tempText}>{`${Math.round(
                 data?.main?.temp,
               )} °C`}</Text>
+              <View style={{display: 'flex', flexDirection: 'row!important'}}>
                <Hour_weather lon={data.coord.lon} lat={data.coord.lat}/>
+               </View>
                <Text>Sunrise in: {getTime(data.sys.sunrise)}</Text>
                <Text>Sunset in: {getTime(data.sys.sunset)}</Text>
             </View>
@@ -150,15 +151,6 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-
-  image: {
-    flex: 1,
-    flexDirection: 'column',
-  },
-
   textInput: {
     borderBottomWidth: 3,
     padding: 30,
