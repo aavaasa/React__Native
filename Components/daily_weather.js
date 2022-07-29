@@ -1,18 +1,17 @@
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
-import { StyleSheet, Text, View, Image, SafeAreaView, FlatList } from 'react-native';
-// import { FlatList } from 'react-native-gesture-handler';
+import { StyleSheet, Text, FlatList, View, Image } from 'react-native';
 
-export default function Hour_weather({lon, lat}) {
+export default function Day_weather({lon, lat}) {
     const [data, setData] = useState();
     const [min_temp, setMinTemp] = useState(0);
     const [max_temp, setMaxTemp] = useState(0);
-    const hours = 24
+    const hours = 7
     useEffect(() => {
       (async () => {
           axios({
             method: 'GET',
-            url: 'https://weatherbit-v1-mashape.p.rapidapi.com/forecast/hourly',
+            url: 'https://weatherbit-v1-mashape.p.rapidapi.com/forecast/daily',
             params: {lat: lat, lon: lon, hours: hours},
             headers: {
                 'X-RapidAPI-Key': 'f9b1643effmsh279fde709356ae0p1828f9jsn1b54b158f403',
@@ -20,7 +19,7 @@ export default function Hour_weather({lon, lat}) {
             }
           })
           .then(res => {
-              const dat = res.data.data
+              const dat = res.data.data.slice(0, 7)
               console.log(dat);
               setData(dat)
               setMinTemp(dat[0].temp)
@@ -41,21 +40,32 @@ export default function Hour_weather({lon, lat}) {
         setMinTemp(cur_temp)
       }
     }
-    function addZero(i) {
-      if (i < 10) {i = "0" + i}
-      return i;
+    function getWeekDay(day) {
+        if (new Date().getDay() != day) {
+            if (day == "0") {
+                return "Sunday"
+            }else if(day == "1") {
+                return "Monday"
+            }else if(day == "2") {
+                return "Tuesday"
+            }else if(day == "3") {
+                return "Wednesday"
+            }else if(day == "4") {
+                return "Thursday"
+            }else if(day == "5") {
+                return "Friday"
+            }else if(day == "6") {
+                return "Saturday"
+            }
+        } else {
+            return 'Today'
+        }
     }
-    function getTime(epoch) {
-      const d = new Date(epoch)
-      let h = addZero(d.getHours());
-      let m = addZero(d.getMinutes());
-      return h + ":" + m;
-    }
-    const Item = ({ time, temp, icon }) => (
+    const Item = ({ day, min_temp, max_temp, icon }) => (
       <View style={styles.item}>
-        <Text style={styles.title}>{getTime(time)}</Text>
+        <Text style={[styles.day, styles.title]}>{getWeekDay(new Date(day).getDay())}</Text>
         <Image style={styles.iconWeather} source={{uri: "https://www.weatherbit.io/static/img/icons/"+icon+".png"}}></Image> 
-        <Text style={styles.title}>{Math.round(temp)}°</Text>
+        <Text style={styles.title}>{Math.round(max_temp)}°/{Math.round(min_temp)}°</Text>
       </View>
     );
     // if (data)
@@ -63,20 +73,17 @@ export default function Hour_weather({lon, lat}) {
     //   console.log("https://www.weatherbit.io/static/img/icons/"+data[0].weather.icon+".png");
     
     const renderItem = ({ item }) => (
-      <Item style={styles.item} time={item.timestamp_local} temp={item.temp} icon={item.weather.icon}/>
+      <Item style={styles.item} day={item.datetime} min_temp={item.min_temp} max_temp={item.max_temp} icon={item.weather.icon}/>
     );
     return (
-      <SafeAreaView style={styles.hourlyWeather}>
-        <Text style={styles.minMaxText}>{`Min ${Math.round(min_temp)} °C / Max ${Math.round(max_temp)} °C`}</Text>
+      <View style={styles.hourlyWeather}>
         <FlatList
         style={styles.flatlist}
-        showsHorizontalScrollIndicator={false}
-        numColumns={hours}
+        // numColumns={hours}
         data={data} 
         renderItem={renderItem} 
-        scrollEnabled={true}
         keyExtractor={item => item.ts}/>
-      </SafeAreaView>
+      </View>
     )
 }
 
@@ -91,20 +98,28 @@ const styles = StyleSheet.create({
     marginRight: 10,
     alignItems: 'center',
     paddingBottom: 10,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   },
   flatlist: {
     maxWidth: 240,
     overflowX: 'auto',
-    position: 'relative'
+    position: 'relative',
+    width: '100%'
   },
   iconWeather: {
     height: 32,
     width: 32
   },
   title: {
-    color: 'white'
+    color: 'white',
+  },
+  day: {
+    minWidth: 70
   },
   hourlyWeather: {
-    alignItems: 'center'
+    alignItems: 'center',
+    width: '100%'
   }
 });
